@@ -383,5 +383,213 @@ To run a Python login page within a Kubernetes cluster created by Minikube, you 
    minikube ip
    ```
    ### --------------------------------------------------------------------------------------------------
+   ### Kubernetes Project1
+   ### Kubernetes with Python Application
+   $ sudo service docker status
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+     Active: active (running) since Fri 2023-10-20 02:11:02 UTC; 1min 24s ago
+....
+....
+
+$ minikube start -p multinode-shadab
+
+$ minikube status -p multinode-shadab
+multinode-shadab
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+multinode-shadab-m02
+type: Worker
+host: Running
+kubelet: Running
+
+multinode-shadab-m03
+type: Worker
+host: Running
+kubelet: Running
+
+$ mkdir k8s-project1
+
+$ cd  k8s-project1
+
+$ touch Dockerfile
+
+$ vim Dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.8-slim
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Run hello.py when the container launches
+
+Source Code:
+--------------------
+app.py
+
+print("Welcome to Python Application")
+print("Python App with Docker Compose")
+
+$ sudo docker images
+REPOSITORY                    TAG       IMAGE ID       CREATED        SIZE
+gcr.io/k8s-minikube/kicbase   v0.0.40   c6cc01e60919   3 months ago   1.19GB
+
+Build Image:
+---------------------
+$ sudo docker build -t k8s-python-app:v1 .
+
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  3.072kB
+Step 1/4 : FROM python:3.8-slim
+3.8-slim: Pulling from library/python
+a378f10b3218: Pull complete
+c11bdfacfd25: Pull complete
+b8cc7de3de04: Pull complete
+93b0b6f266cf: Pull complete
+5951bacf5eee: Pull complete
+Digest: sha256:3324295e27596c2a4b3e53615af5ca3b280674208a24906db76812628c2ce4c8
+Status: Downloaded newer image for python:3.8-slim
+ ---> 8d66c9fb0764
+Step 2/4 : WORKDIR /app
+ ---> Running in a2dfde78aa4d
+Removing intermediate container a2dfde78aa4d
+ ---> c4f907394aab
+Step 3/4 : COPY . /app
+ ---> 3e78f2cd7941
+Step 4/4 : CMD ["python3", "app.py"]
+ ---> Running in 2c7c7e5b9001
+Removing intermediate container 2c7c7e5b9001
+ ---> 57e4c1330254
+Successfully built 57e4c1330254
+Successfully tagged k8s-python-app:v1
+
+$ sudo docker image ls
+REPOSITORY                    TAG        IMAGE ID       CREATED          SIZE
+k8s-python-app                v1         57e4c1330254   51 seconds ago   128MB
+python                        3.8-slim   8d66c9fb0764   4 days ago       128MB
+gcr.io/k8s-minikube/kicbase   v0.0.40    c6cc01e60919   3 months ago     1.19GB
+
+Python:
+-------------
+ubuntu@ip-172-31-44-80:~/k8s-project1$ python --version
+Command 'python' not found, did you mean:
+  command 'python3' from deb python3
+  command 'python' from deb python-is-python3
+ubuntu@ip-172-31-44-80:~/k8s-project1$ py --version
+Command 'py' not found, but can be installed with:
+sudo apt install pythonpy
+ubuntu@ip-172-31-44-80:~/k8s-project1$ python3 --version
+Python 3.10.12
+
+Create Kubernetes Resources:
+----------------------------------------------
+
+Now, create Kubernetes resources to deploy your Python application. Create a Kubernetes Deployment and a Service to expose your application. Here's a simplified example
+ of Kubernetes YAML files:
+
+deployment.yaml:
+--------------------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-python-app
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: k8s-python-app
+    spec:
+      containers:
+      - name: k8s-python-app-container
+        image: k8s-python-app:v1
+        ports:
+        - containerPort: 80
+
+service.yaml:
+-----------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-python-app-service
+spec:
+  selector:
+    app: k8s-python-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: NodePort
+
+Apply the Kubernetes Resources:
+------------------------------------------------
+Apply the Kubernetes resource definitions to create and run your Python  application:
+
+kubectl apply -f deployment.yaml
+
+Issue:
+----------
+$ kubectl apply -f deployment.yaml
+error: error validating "deployment.yaml": error validating data: ValidationError(Deployment.spec): missing required field "selector" in 
+io.k8s.api.apps.v1.DeploymentSpec; if you choose to ignore these errors, turn validation off with --validate=false
+
+$ kubectl apply -f deployment.yaml --validate=false
+The Deployment "k8s-python-app" is invalid:
+* spec.selector: Required value
+* spec.template.metadata.labels: Invalid value: map[string]string{"app":"k8s-python-app"}: `selector` does not match template `labels`
+
+Solution:
+-----------------
+Need to remove deployment.yaml from /var/tmp
+
+root@ip-172-31-44-80:/var# cd
+root@ip-172-31-44-80:~# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       7.6G  7.6G     0 100% /
+tmpfs           2.0G     0  2.0G   0% /dev/shm
+tmpfs           781M  9.2M  772M   2% /run
+tmpfs           5.0M     0  5.0M   0% /run/lock
+/dev/xvda15     105M  6.1M   99M   6% /boot/efi
+tmpfs           391M  4.0K  391M   1% /run/user/1000
+overlay         7.6G  7.6G     0 100% /var/lib/docker/overlay2/c61c3e40650c6b1b33dc24d4ad4ee08b1b4f33a2e0debbea4bb0947d6707efee/merged
+overlay         7.6G  7.6G     0 100% /var/lib/docker/overlay2/3e947a3af586319beac36af15c3d0d9db1f343bbd5798b1ed7db3fa2a6181ac9/merged
+overlay         7.6G  7.6G     0 100% /var/lib/docker/overlay2/4ee1d867ece173f3e2940ee98eede13f1ea26312774ad01319377cf8b45ca4c2/merged
+
+Upgrade Server Storage:
+--------------------------------------
+Image --> Backup of OS files and Storage
+
+Snapshots --> Backup of EBS(Elastic Block Store)/Volume/Storage
+
+
+
+Rename Python Application:
+------------------------------------------
+$ sudo mv app.py k8s-python-app.py
+ubuntu@ip-172-31-44-80:~/k8s-project1$ ls
+Dockerfile  deployment.yaml  k8s-python-app.py  service.yaml
+ubuntu@ip-172-31-44-80:~/k8s-project1$ cat k8s-python-app.py
+print("Welcome to Python Application")
+print("Python App with Kubernetes")
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Issue:
+----------
+$ kubectl apply -f deployment.yaml
+error: error validating "deployment.yaml": error validating data: ValidationError(Deployment.spec): missing required field "selector" in io.k8s.api.apps.v1.DeploymentSpec; if you choose to ignore these errors, turn validation off with --validate=false
+
+
+
+
 
 
