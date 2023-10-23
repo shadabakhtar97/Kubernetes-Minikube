@@ -3,14 +3,40 @@ Learn Kubernetes for Development Environment with Minikube Deep Dive
 ### Kubernetes-Minikube All Commands in One Go
 Download Minikube
 ```
-$ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 ```
-
-
+Install Minikube
+```
+curl install minikube-linux-amd64 /usr/local/bin/minikube
+```
+Download "kubect"
+```
+curl -o kubectl https://storage.googleapis.com/kubernetes-release/release/v1.23.3/bin/linux/amd64/kubectl
+```
+Change User Permission
+```
+chmod u+x kubectl
+```
+Move "kubectl" to /usr/local/bin
+```
+sudo mv kubectl /usr/local/bin
+```
+Check "kubectl" Version
+```
+kubectl version --short
+```
+Start/Stop/Status Minikube with Single Node(Control Plane Node)
+```
+minikube start/stop/status
+```
+Start/Stop/Status Minikube with Multi Node(Control Plane Node and Worker Node)
+```
+minikube start --nodes 3 -p shadabcluster
+```
 Check All Default Pods
-
-$ minikube kubectl -- get pods -A
-
+```
+minikube kubectl -- get pods -A
+```
 
 
 
