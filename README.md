@@ -1,5 +1,18 @@
 # Kubernetes-Minikube
 Learn Kubernetes for Development Environment with Minikube Deep Dive
+### Kubernetes-Minikube All Commands in One Go
+Download Minikube
+```
+$ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+```
+
+
+Check All Default Pods
+
+$ minikube kubectl -- get pods -A
+
+
+
 
 ### What is Minikube ?
 Minikube is an open-source tool that facilitates the local deployment of a single-node Kubernetes cluster on your development machine. Kubernetes is a powerful container orchestration platform used for managing containerized applications. Minikube makes it easier for developers to test and develop applications in a Kubernetes environment without the need for a full-scale, multi-node Kubernetes cluster.
