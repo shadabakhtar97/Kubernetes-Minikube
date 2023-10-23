@@ -31,11 +31,15 @@ minikube start/stop/status
 ```
 Start/Stop/Status Minikube with Multi Node(Control Plane Node and Worker Node)
 ```
-minikube start --nodes 3 -p shadabcluster
-```
 Check All Default Pods
 ```
 minikube kubectl -- get pods -A
+```
+minikube start --nodes 3 -p shadabcluster
+```
+Check All Nodes
+```
+kubectl get nodes
 ```
 
 
